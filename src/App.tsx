@@ -76,7 +76,7 @@ const SEED: Omit<Project, 'id' | 'added'>[] = [
     alias: '',
     url: 'https://sonata-face.vercel.app/payments',
     description:
-      'Payments console for the Sonata Face project. Track ledgers, settle up, move on.',
+      'Admin console for Revathi Music & Arts School — student records and fee management in one place.',
     icon: '◐',
   },
 ]
@@ -127,6 +127,17 @@ function loadProjects(): Project[] {
     seen = stored.map((p) => p.url)
   }
 
+  // Refresh seed-derived copy for entries the user hasn't customized.
+  const seedByUrl = new Map(SEED.map((s) => [s.url, s]))
+  const refreshed = stored.map((p) => {
+    const s = seedByUrl.get(p.url)
+    if (!s) return p
+    if (p.name === s.name && p.icon === s.icon) {
+      return { ...p, description: s.description, comingSoon: s.comingSoon }
+    }
+    return p
+  })
+
   const seenSet = new Set(seen)
   const newSeeds = SEED.filter((s) => !seenSet.has(s.url))
 
@@ -134,7 +145,7 @@ function loadProjects(): Project[] {
     try {
       localStorage.setItem(SEEN_KEY, JSON.stringify(seen))
     } catch {}
-    return stored
+    return refreshed
   }
 
   const additions = newSeeds.map((s, i) => ({
@@ -148,7 +159,7 @@ function loadProjects(): Project[] {
       JSON.stringify([...seen, ...newSeeds.map((s) => s.url)]),
     )
   } catch {}
-  return [...stored, ...additions]
+  return [...refreshed, ...additions]
 }
 
 function isImageSrc(s: string) {
