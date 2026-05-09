@@ -16,6 +16,7 @@ type Project = {
   description: string
   icon: string
   added: number
+  comingSoon?: boolean
 }
 
 const STORAGE_KEY = 'home::projects::v2'
@@ -60,6 +61,15 @@ const SEED: Omit<Project, 'id' | 'added'>[] = [
     description:
       'Spaced-repetition decks. Build cards, drill them, remember them.',
     icon: '🗂',
+  },
+  {
+    name: 'Octave',
+    alias: '',
+    url: 'https://github.com/sandeepsj/octave',
+    description:
+      'A tuned little something in eight notes. Repo is up — the app is on its way.',
+    icon: '♪',
+    comingSoon: true,
   },
 ]
 
@@ -114,6 +124,7 @@ const empty: Omit<Project, 'id' | 'added'> = {
   url: '',
   description: '',
   icon: '',
+  comingSoon: false,
 }
 
 export default function App() {
@@ -161,7 +172,13 @@ export default function App() {
     const q = query.trim().toLowerCase()
     if (!q) return projects
     return projects.filter((p) =>
-      [p.alias, p.name, p.description, p.url]
+      [
+        p.alias,
+        p.name,
+        p.description,
+        p.url,
+        p.comingSoon ? 'coming soon' : '',
+      ]
         .join(' ')
         .toLowerCase()
         .includes(q),
@@ -371,6 +388,19 @@ export default function App() {
             </Field>
           </div>
           <div className="composer__actions">
+            <label className="toggle">
+              <input
+                type="checkbox"
+                checked={!!draft.comingSoon}
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, comingSoon: e.target.checked }))
+                }
+              />
+              <span className="toggle__box" aria-hidden>
+                {draft.comingSoon ? '✓' : ''}
+              </span>
+              <span className="toggle__label">mark as coming soon</span>
+            </label>
             <button type="submit" className="primary">
               File entry ↵
             </button>
@@ -556,6 +586,22 @@ function Card({
               }
             />
           </label>
+          <label className="inline-field inline-field--wide inline-field--toggle">
+            <span>state</span>
+            <label className="toggle toggle--inline">
+              <input
+                type="checkbox"
+                checked={!!draft.comingSoon}
+                onChange={(e) =>
+                  setDraft({ ...draft, comingSoon: e.target.checked })
+                }
+              />
+              <span className="toggle__box" aria-hidden>
+                {draft.comingSoon ? '✓' : ''}
+              </span>
+              <span className="toggle__label">coming soon</span>
+            </label>
+          </label>
         </div>
 
         <footer className="card__foot card__foot--editing">
@@ -588,9 +634,16 @@ function Card({
 
   return (
     <article
-      className="card"
+      className={`card${project.comingSoon ? ' card--soon' : ''}`}
       style={{ '--tilt': `${tilt}deg` } as React.CSSProperties}
     >
+      {project.comingSoon && (
+        <span className="stamp" aria-label="coming soon">
+          <span className="stamp__rule" />
+          <span className="stamp__text">Coming&nbsp;Soon</span>
+          <span className="stamp__rule" />
+        </span>
+      )}
       <header className="card__hed">
         <span className="card__num">Nº&nbsp;{num}</span>
         <span className="card__hed-rule" aria-hidden />
@@ -634,7 +687,7 @@ function Card({
         <footer className="card__foot">
           <span className="card__url">{hostOf(project.url)}</span>
           <span className="card__arrow" aria-hidden>
-            ↗
+            {project.comingSoon ? '⟶' : '↗'}
           </span>
         </footer>
       </a>
