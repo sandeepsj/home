@@ -71,6 +71,14 @@ const SEED: Omit<Project, 'id' | 'added'>[] = [
     icon: '♪',
     comingSoon: true,
   },
+  {
+    name: 'Sonata Face',
+    alias: '',
+    url: 'https://sonata-face.vercel.app/payments',
+    description:
+      'Payments console for the Sonata Face project. Track ledgers, settle up, move on.',
+    icon: '◐',
+  },
 ]
 
 function uid() {
