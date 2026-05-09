@@ -77,22 +77,70 @@ function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
 
+const SEEN_KEY = 'home::seeds-seen::v1'
+
 function loadProjects(): Project[] {
+  let stored: Project[] | null = null
+  let seen: string[] = []
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as Project[]
-      if (Array.isArray(parsed)) return parsed
+      if (Array.isArray(parsed)) stored = parsed
+    }
+    const seenRaw = localStorage.getItem(SEEN_KEY)
+    if (seenRaw) {
+      const parsedSeen = JSON.parse(seenRaw) as string[]
+      if (Array.isArray(parsedSeen)) seen = parsedSeen
     }
   } catch {
-    // fall through to seed
+    // fall through to defaults
   }
+
   const now = Date.now()
-  return SEED.map((s, i) => ({
+  const seedUrls = SEED.map((s) => s.url)
+
+  // Fresh install: present the full seed.
+  if (stored === null) {
+    const projects = SEED.map((s, i) => ({
+      ...s,
+      id: uid(),
+      added: now - (SEED.length - i) * 1000,
+    }))
+    try {
+      localStorage.setItem(SEEN_KEY, JSON.stringify(seedUrls))
+    } catch {}
+    return projects
+  }
+
+  // Existing user without a seen list — bootstrap from what they already have
+  // so we don't duplicate seeds they've kept.
+  if (seen.length === 0) {
+    seen = stored.map((p) => p.url)
+  }
+
+  const seenSet = new Set(seen)
+  const newSeeds = SEED.filter((s) => !seenSet.has(s.url))
+
+  if (newSeeds.length === 0) {
+    try {
+      localStorage.setItem(SEEN_KEY, JSON.stringify(seen))
+    } catch {}
+    return stored
+  }
+
+  const additions = newSeeds.map((s, i) => ({
     ...s,
     id: uid(),
-    added: now - (SEED.length - i) * 1000,
+    added: now + i,
   }))
+  try {
+    localStorage.setItem(
+      SEEN_KEY,
+      JSON.stringify([...seen, ...newSeeds.map((s) => s.url)]),
+    )
+  } catch {}
+  return [...stored, ...additions]
 }
 
 function isImageSrc(s: string) {
