@@ -7,16 +7,30 @@
   --paper: #ece3cf;
   --paper-deep: #e2d6bb;
   --card: #f3ebd6;
+  --card-hover: #f7efd9;
+  --card-editing: #fff8e2;
   --card-edge: #d8caa8;
+  --card-soon: #ede4ce;
+  --card-soon-icon: #f3e8c8;
   --ink: #1a1612;
   --ink-soft: #3a322a;
   --mute: #8a7e64;
   --rule: #c4b594;
+  --shadow-ink: #1a1612;
   --accent: #b5341c;
   --accent-soft: #d96b48;
   --accent-ink: #6b1d0e;
+  --accent-tint: rgba(181, 52, 28, 0.06);
+  --accent-tint-strong: rgba(181, 52, 28, 0.08);
   --teal: #1e463f;
   --highlight: #f8d063;
+  --vignette: rgba(60, 40, 18, 0.18);
+  --grain-blend: multiply;
+  --grain-opacity: 0.45;
+  --foot-editing-bg: rgba(255, 248, 226, 0.6);
+  --body-glow-1: rgba(181, 52, 28, 0.08);
+  --body-glow-2: rgba(30, 70, 63, 0.08);
+  --body-glow-3: rgba(248, 208, 99, 0.1);
 
   --serif: 'Fraunces', 'Cormorant Garamond', 'Source Serif Pro', Georgia,
     serif;
@@ -30,6 +44,38 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-synthesis: none;
+}
+
+[data-theme='dark'] {
+  --paper: #14110d;
+  --paper-deep: #0c0a07;
+  --card: #1d1813;
+  --card-hover: #25201a;
+  --card-editing: #2c2418;
+  --card-edge: #3b3024;
+  --card-soon: #221d17;
+  --card-soon-icon: #2a241c;
+  --ink: #ede4cf;
+  --ink-soft: #c4b594;
+  --mute: #8a7d63;
+  --rule: #4a3f2e;
+  --shadow-ink: #000000;
+  --accent: #e36240;
+  --accent-soft: #f08763;
+  --accent-ink: #f8d063;
+  --accent-tint: rgba(227, 98, 64, 0.1);
+  --accent-tint-strong: rgba(227, 98, 64, 0.16);
+  --teal: #5c9a8e;
+  --highlight: #f8d063;
+  --vignette: rgba(0, 0, 0, 0.5);
+  --grain-blend: screen;
+  --grain-opacity: 0.16;
+  --foot-editing-bg: rgba(248, 208, 99, 0.06);
+  --body-glow-1: rgba(227, 98, 64, 0.08);
+  --body-glow-2: rgba(92, 154, 142, 0.06);
+  --body-glow-3: rgba(248, 208, 99, 0.05);
+
+  color-scheme: dark;
 }
 
 * {
@@ -46,21 +92,9 @@ body {
 
 body {
   background-image:
-    radial-gradient(
-      circle at 20% -10%,
-      rgba(181, 52, 28, 0.08),
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 110% 20%,
-      rgba(30, 70, 63, 0.08),
-      transparent 50%
-    ),
-    radial-gradient(
-      circle at 50% 110%,
-      rgba(248, 208, 99, 0.1),
-      transparent 55%
-    );
+    radial-gradient(circle at 20% -10%, var(--body-glow-1), transparent 45%),
+    radial-gradient(circle at 110% 20%, var(--body-glow-2), transparent 50%),
+    radial-gradient(circle at 50% 110%, var(--body-glow-3), transparent 55%);
   background-attachment: fixed;
 }
 
@@ -109,8 +143,8 @@ kbd {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.45;
-  mix-blend-mode: multiply;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: var(--grain-blend);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.10 0 0 0 0 0.08 0 0 0 0 0.05 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
 }
 
@@ -122,7 +156,7 @@ kbd {
   background: radial-gradient(
     ellipse at center,
     transparent 55%,
-    rgba(60, 40, 18, 0.18) 100%
+    var(--vignette) 100%
   );
 }
 
@@ -194,6 +228,41 @@ kbd {
 
 .masthead__date {
   letter-spacing: 0.22em;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 2px;
+  transition: color 120ms ease, background 120ms ease, transform 120ms ease;
+}
+
+.theme-toggle:hover {
+  color: var(--paper);
+  background: var(--ink);
+  transform: translate(-1px, -1px);
+}
+
+.theme-toggle__glyph {
+  font-family: var(--serif);
+  font-style: normal;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.theme-toggle:hover .theme-toggle__glyph {
+  color: var(--highlight);
 }
 
 .title {
@@ -302,7 +371,7 @@ kbd {
   border: 1px solid var(--ink);
   border-radius: 2px;
   padding: 12px 14px;
-  box-shadow: 4px 4px 0 var(--ink);
+  box-shadow: 4px 4px 0 var(--shadow-ink);
   transition: box-shadow 120ms ease, transform 120ms ease;
 }
 
@@ -375,7 +444,7 @@ kbd {
 .composer-toggle.is-open {
   background: var(--paper);
   color: var(--ink);
-  box-shadow: 4px 4px 0 var(--ink);
+  box-shadow: 4px 4px 0 var(--shadow-ink);
 }
 
 .composer-toggle__plus {
@@ -397,7 +466,7 @@ kbd {
   background: var(--card);
   padding: 22px clamp(18px, 3vw, 28px) 22px;
   margin-bottom: 28px;
-  box-shadow: 8px 8px 0 var(--ink);
+  box-shadow: 8px 8px 0 var(--shadow-ink);
   position: relative;
 }
 
@@ -479,7 +548,7 @@ kbd {
 
 .field input:focus {
   border-bottom-color: var(--accent);
-  background: rgba(181, 52, 28, 0.06);
+  background: var(--accent-tint);
 }
 
 .field__hint {
@@ -612,7 +681,7 @@ kbd {
     box-shadow 220ms ease,
     background 200ms ease;
   box-shadow:
-    4px 4px 0 var(--ink),
+    4px 4px 0 var(--shadow-ink),
     inset 0 0 0 6px var(--card),
     inset 0 0 0 7px var(--card-edge);
 }
@@ -631,10 +700,10 @@ kbd {
 .card:hover {
   transform: rotate(0deg) translate(-3px, -5px);
   box-shadow:
-    8px 10px 0 var(--ink),
+    8px 10px 0 var(--shadow-ink),
     inset 0 0 0 6px var(--card),
     inset 0 0 0 7px var(--card-edge);
-  background: #f7efd9;
+  background: var(--card-hover);
   z-index: 2;
 }
 
@@ -643,10 +712,10 @@ kbd {
 }
 
 .card--editing {
-  background: #fff8e2;
+  background: var(--card-editing);
   box-shadow:
     6px 6px 0 var(--accent),
-    inset 0 0 0 6px #fff8e2,
+    inset 0 0 0 6px var(--card-editing),
     inset 0 0 0 7px var(--card-edge);
 }
 
@@ -727,7 +796,7 @@ kbd {
   border: 1px solid var(--ink);
   border-radius: 50%;
   margin: 6px 0 18px;
-  box-shadow: 2px 2px 0 var(--ink);
+  box-shadow: 2px 2px 0 var(--shadow-ink);
   transition: transform 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
@@ -845,7 +914,7 @@ kbd {
 /* ─── Coming-soon stamp ───────────────────────────────────── */
 
 .card--soon {
-  background: #ede4ce;
+  background: var(--card-soon);
 }
 
 .card--soon::before {
@@ -864,7 +933,7 @@ kbd {
 }
 
 .card--soon .card__icon {
-  background: #f3e8c8;
+  background: var(--card-soon-icon);
   filter: grayscale(0.15);
 }
 
@@ -1026,7 +1095,7 @@ kbd {
 }
 
 .inline-field input:focus {
-  background: rgba(181, 52, 28, 0.08);
+  background: var(--accent-tint-strong);
 }
 
 .card__foot--editing {
@@ -1036,7 +1105,7 @@ kbd {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 248, 226, 0.6);
+  background: var(--foot-editing-bg);
 }
 
 .card__actions-right {

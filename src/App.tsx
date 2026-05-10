@@ -20,6 +20,28 @@ type Project = {
 }
 
 const STORAGE_KEY = 'home::projects::v2'
+const THEME_KEY = 'home::theme'
+
+type Theme = 'light' | 'dark'
+
+function initialTheme(): Theme {
+  if (typeof document !== 'undefined') {
+    const attr = document.documentElement.dataset.theme
+    if (attr === 'light' || attr === 'dark') return attr
+  }
+  try {
+    const stored = localStorage.getItem(THEME_KEY)
+    if (stored === 'light' || stored === 'dark') return stored
+  } catch {}
+  if (
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  ) {
+    return 'dark'
+  }
+  return 'light'
+}
 
 const SEED: Omit<Project, 'id' | 'added'>[] = [
   {
@@ -200,6 +222,7 @@ export default function App() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [composing, setComposing] = useState(false)
   const [draft, setDraft] = useState(empty)
+  const [theme, setTheme] = useState<Theme>(() => initialTheme())
 
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -210,6 +233,38 @@ export default function App() {
       // ignore quota errors
     }
   }, [projects])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) {
+      meta.setAttribute('content', theme === 'dark' ? '#14110d' : '#ECE3CF')
+    }
+  }, [theme])
+
+  // Follow OS changes only while the user hasn't picked a theme themselves.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    const onChange = (e: MediaQueryListEvent) => {
+      try {
+        if (localStorage.getItem(THEME_KEY)) return
+      } catch {}
+      setTheme(e.matches ? 'dark' : 'light')
+    }
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [])
+
+  const toggleTheme = () => {
+    setTheme((t) => {
+      const next = t === 'dark' ? 'light' : 'dark'
+      try {
+        localStorage.setItem(THEME_KEY, next)
+      } catch {}
+      return next
+    })
+  }
 
   // Focus search on mount and on `/`.
   useEffect(() => {
@@ -314,6 +369,18 @@ export default function App() {
           </span>
           <span className="masthead__rule" aria-hidden />
           <span className="masthead__date">{today}</span>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+          >
+            <span className="theme-toggle__glyph" aria-hidden>
+              {theme === 'dark' ? '☾' : '☼'}
+            </span>
+            <span>{theme === 'dark' ? 'dark' : 'light'}</span>
+          </button>
         </div>
 
         <h1 className="title">
