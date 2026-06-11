@@ -81,6 +81,63 @@ const SEED: Omit<Project, 'id' | 'added'>[] = [
   },
 ]
 
+/* ─── Claude MCP connectors ───────────────────────────────────
+   One entry per uplink. Add future connectors here and the
+   section renders them automatically. */
+
+type Connector = {
+  id: string
+  name: string
+  tagline: string
+  endpoint: string
+  blurb: string
+  tools: { name: string; what: string }[]
+  webSteps: (string | { text: string; code: string })[]
+  cliSteps: (string | { text: string; code: string })[]
+  tryPrompt: string
+  note?: string
+}
+
+const CONNECTORS: Connector[] = [
+  {
+    id: 'flashcards',
+    name: 'Flashcards',
+    tagline: 'FlashDSA deck · spaced repetition',
+    endpoint: 'https://flashdsa-mcp.sandeepsj0000.workers.dev/mcp',
+    blurb:
+      'Gives Claude direct read/write access to the flashcard deck. Claude can scan every topic, check for duplicate cards, and file brand-new cards into the right topic — they land in Google Drive and show up in the app, due immediately.',
+    tools: [
+      { name: 'get_deck_overview', what: 'every topic with its card counts' },
+      { name: 'list_cards', what: 'browse / search existing cards' },
+      { name: 'add_cards', what: 'file new cards into a topic' },
+    ],
+    webSteps: [
+      'Open claude.ai → Settings → Connectors',
+      'Choose “Add custom connector”',
+      {
+        text: 'Paste the endpoint URL',
+        code: 'https://flashdsa-mcp.sandeepsj0000.workers.dev/mcp',
+      },
+      'Approve the connector, then complete the Google sign-in — the deck lives in your Google Drive',
+      'In any chat, make sure the connector is enabled in the tools menu, then just ask',
+    ],
+    cliSteps: [
+      {
+        text: 'Register the server with Claude Code',
+        code: 'claude mcp add --transport http flashcards https://flashdsa-mcp.sandeepsj0000.workers.dev/mcp',
+      },
+      {
+        text: 'Inside a session, authenticate it',
+        code: '/mcp',
+      },
+      'Pick “flashcards” and finish the OAuth flow in the browser',
+    ],
+    tryPrompt:
+      'Look at my flashcard deck, then create 3 flashcards about binary search and add them wherever they fit best.',
+    note: 'Cards are stored in flashcards-data.json in Drive — refresh the Flashcard app after adding and they appear, due today.',
+  },
+]
+
 function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
@@ -304,13 +361,16 @@ export default function App() {
 
   return (
     <div className="page">
-      <div className="grain" aria-hidden />
-      <div className="vignette" aria-hidden />
+      <div className="bg-aurora" aria-hidden />
+      <div className="bg-grid" aria-hidden />
+      <div className="bg-scan" aria-hidden />
+      <div className="bg-noise" aria-hidden />
 
       <header className="masthead">
         <div className="masthead__row">
           <span className="masthead__mark">
-            <span className="dot" aria-hidden /> IDX. <em>vol. i</em>
+            <span className="dot" aria-hidden /> SJ://CONSOLE&nbsp;
+            <em>v2.0</em>
           </span>
           <span className="masthead__rule" aria-hidden />
           <span className="masthead__date">{today}</span>
@@ -319,18 +379,18 @@ export default function App() {
         <h1 className="title">
           <span className="title__line">Personal</span>
           <span className="title__line title__line--accent">
-            Directory<span className="title__period">.</span>
+            Directory<span className="title__cursor">_</span>
           </span>
         </h1>
 
         <p className="lede">
-          A working catalogue of self-built tools, kept for the keeper. Aliases
-          and entries live in this browser — bring your own&nbsp;dictionary.
+          A live console of self-built tools. Aliases and entries persist in
+          this browser — bring your own dictionary.
         </p>
 
         <div className="masthead__row masthead__row--bottom">
           <span className="meta">
-            <span className="meta__k">entries</span>
+            <span className="meta__k">nodes</span>
             <span className="meta__leader" aria-hidden />
             <span className="meta__v">
               {String(projects.length).padStart(3, '0')}
@@ -343,6 +403,13 @@ export default function App() {
               {query
                 ? `${filtered.length}/${projects.length}`
                 : 'all visible'}
+            </span>
+          </span>
+          <span className="meta">
+            <span className="meta__k">uplinks</span>
+            <span className="meta__leader" aria-hidden />
+            <span className="meta__v">
+              {String(CONNECTORS.length).padStart(2, '0')} live
             </span>
           </span>
           <span className="meta">
@@ -398,7 +465,7 @@ export default function App() {
       {composing && (
         <form className="composer" onSubmit={submitDraft}>
           <div className="composer__hed">
-            <span className="composer__num">Nº new</span>
+            <span className="composer__num">// new node</span>
             <span className="composer__rule" aria-hidden />
             <span className="composer__hint">
               Press <kbd>Esc</kbd> to cancel
@@ -507,19 +574,190 @@ export default function App() {
         )}
       </main>
 
+      <UplinkSection />
+
       <footer className="colophon">
         <span className="colophon__row">
-          <span className="colophon__mark">¶</span>
+          <span className="colophon__mark">⟁</span>
           <span className="colophon__rule" aria-hidden />
-          <span>set in Fraunces &amp; JetBrains Mono</span>
+          <span>set in Space Grotesk &amp; JetBrains Mono</span>
         </span>
         <span className="colophon__row">
           <span>state lives in&nbsp;<code>localStorage</code></span>
           <span className="colophon__rule" aria-hidden />
-          <span>printed daily at&nbsp;{today.toLowerCase()}</span>
+          <span>compiled at&nbsp;{today.toLowerCase()}</span>
         </span>
       </footer>
     </div>
+  )
+}
+
+/* ─── Claude uplinks (MCP connectors) ────────────────────── */
+
+function UplinkSection() {
+  const [openId, setOpenId] = useState<string | null>(null)
+
+  return (
+    <section className="uplink" aria-label="Claude MCP connectors">
+      <header className="uplink__hed">
+        <span className="uplink__sigil" aria-hidden>
+          ⟁
+        </span>
+        <div className="uplink__hed-text">
+          <h2 className="uplink__title">Claude Uplinks</h2>
+          <p className="uplink__sub">
+            MCP connectors that let Claude operate these tools directly —
+            reading state, filing data, doing the busywork.
+          </p>
+        </div>
+        <span className="uplink__count">
+          {String(CONNECTORS.length).padStart(2, '0')} live
+        </span>
+      </header>
+
+      <div className="uplink__list">
+        {CONNECTORS.map((c) => (
+          <UplinkItem
+            key={c.id}
+            connector={c}
+            open={openId === c.id}
+            onToggle={() => setOpenId((v) => (v === c.id ? null : c.id))}
+          />
+        ))}
+        <div className="uplink__soon">
+          <span className="uplink__soon-dot" aria-hidden />
+          more uplinks being forged — journal, resume maker, and friends will
+          dock here
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function UplinkItem({
+  connector,
+  open,
+  onToggle,
+}: {
+  connector: Connector
+  open: boolean
+  onToggle: () => void
+}) {
+  const bodyId = `uplink-body-${connector.id}`
+  return (
+    <article className={`uplink-item${open ? ' is-open' : ''}`}>
+      <button
+        type="button"
+        className="uplink-item__head"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={bodyId}
+      >
+        <span className="uplink-item__status" aria-hidden>
+          <span className="pulse" />
+        </span>
+        <span className="uplink-item__name">{connector.name}</span>
+        <span className="uplink-item__tagline">{connector.tagline}</span>
+        <span className="uplink-item__host">{hostOf(connector.endpoint)}</span>
+        <span className="uplink-item__chev" aria-hidden>
+          ▾
+        </span>
+      </button>
+
+      {open && (
+        <div className="uplink-item__body" id={bodyId}>
+          <p className="uplink-item__blurb">{connector.blurb}</p>
+
+          <div className="uplink-item__cols">
+            <div className="uplink-path">
+              <h3 className="uplink-path__title">
+                <span className="uplink-path__badge">A</span> claude.ai · web
+                &amp; desktop
+              </h3>
+              <ol className="uplink-path__steps">
+                {connector.webSteps.map((s, i) => (
+                  <Step key={i} step={s} />
+                ))}
+              </ol>
+            </div>
+
+            <div className="uplink-path">
+              <h3 className="uplink-path__title">
+                <span className="uplink-path__badge">B</span> claude code ·
+                terminal
+              </h3>
+              <ol className="uplink-path__steps">
+                {connector.cliSteps.map((s, i) => (
+                  <Step key={i} step={s} />
+                ))}
+              </ol>
+            </div>
+          </div>
+
+          <div className="uplink-item__tools">
+            <span className="uplink-item__tools-label">exposed tools</span>
+            {connector.tools.map((t) => (
+              <span className="tool-chip" key={t.name} title={t.what}>
+                {t.name}
+              </span>
+            ))}
+          </div>
+
+          <div className="uplink-item__try">
+            <span className="uplink-item__try-label">first transmission</span>
+            <CopyBlock text={connector.tryPrompt} kind="prompt" />
+          </div>
+
+          {connector.note && (
+            <p className="uplink-item__note">{connector.note}</p>
+          )}
+        </div>
+      )}
+    </article>
+  )
+}
+
+function Step({ step }: { step: string | { text: string; code: string } }) {
+  if (typeof step === 'string') {
+    return <li className="uplink-step">{step}</li>
+  }
+  return (
+    <li className="uplink-step">
+      {step.text}
+      <CopyBlock text={step.code} kind="code" />
+    </li>
+  )
+}
+
+function CopyBlock({ text, kind }: { text: string; kind: 'code' | 'prompt' }) {
+  const [copied, setCopied] = useState(false)
+  const timer = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      window.clearTimeout(timer.current)
+      timer.current = window.setTimeout(() => setCopied(false), 1600)
+    } catch {
+      // clipboard unavailable; nothing to do
+    }
+  }
+
+  return (
+    <span className={`copyblock copyblock--${kind}`}>
+      <code className="copyblock__text">{text}</code>
+      <button
+        type="button"
+        className={`copyblock__btn${copied ? ' is-copied' : ''}`}
+        onClick={copy}
+        aria-label="Copy to clipboard"
+      >
+        {copied ? 'copied ✓' : 'copy'}
+      </button>
+    </span>
   )
 }
 
@@ -584,16 +822,16 @@ function Card({
   const display = project.alias.trim() || project.name
   const showAka = !!project.alias.trim()
   const num = String(index).padStart(2, '0')
-  const tilt = ((orderHint % 5) - 2) * 0.12 // -0.24deg .. +0.24deg
+  const hue = (orderHint * 47) % 360 // per-card accent drift
 
   if (isEditing) {
     return (
       <article
         className="card card--editing"
-        style={{ '--tilt': `0deg` } as React.CSSProperties}
+        style={{ '--hue': hue } as React.CSSProperties}
       >
         <header className="card__hed">
-          <span className="card__num">Nº&nbsp;{num}</span>
+          <span className="card__num">N{num}</span>
           <span className="card__hed-rule" aria-hidden />
           <span className="card__status">editing</span>
         </header>
@@ -702,17 +940,15 @@ function Card({
   return (
     <article
       className={`card${project.comingSoon ? ' card--soon' : ''}`}
-      style={{ '--tilt': `${tilt}deg` } as React.CSSProperties}
+      style={{ '--hue': hue } as React.CSSProperties}
     >
       {project.comingSoon && (
         <span className="stamp" aria-label="coming soon">
-          <span className="stamp__rule" />
-          <span className="stamp__text">Coming&nbsp;Soon</span>
-          <span className="stamp__rule" />
+          <span className="stamp__text">Incoming</span>
         </span>
       )}
       <header className="card__hed">
-        <span className="card__num">Nº&nbsp;{num}</span>
+        <span className="card__num">N{num}</span>
         <span className="card__hed-rule" aria-hidden />
         <button
           type="button"
