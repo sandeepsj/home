@@ -418,6 +418,9 @@ export default function App() {
 
   const orbs = useRef<Orb[]>(makeOrbs(PROJECTS.length))
   const els = useRef<(HTMLDivElement | null)[]>([])
+  const fieldEl = useRef<HTMLDivElement | null>(null)
+  const pinned = useRef<Record<number, { x: number; y: number }>>({}) // orbs the user has dragged into place — anchored until a blast
+  const orbDrag = useRef<{ i: number; sx: number; sy: number; moved: boolean } | null>(null)
   const wheelEl = useRef<SVGSVGElement | null>(null)
   const tRef = useRef(0) // shared time — only changes while you crank
   const prevT = useRef(0) // last frame's t (for tick detection)
@@ -470,10 +473,11 @@ export default function App() {
         const el = els.current[i]
         if (!el) return
         const pos = orbAt(o, t)
-        let x = pos.x,
-          y = pos.y
+        const pin = pinned.current[i] // a dragged orb stays put — the crank no longer stirs it
+        let x = pin ? pin.x : pos.x,
+          y = pin ? pin.y : pos.y
         const size = pos.size
-        if (bDirs) {
+        if (bDirs && !pin) {
           const d = bDirs[i]
           x += d.ux * d.mag * bF
           y += d.uy * d.mag * bF * 0.72
@@ -535,8 +539,45 @@ export default function App() {
       tween.current = { from: tRef.current, to: tRef.current + delta, start: performance.now(), dur: 850 }
     }
   }
+  /* per-orb drag: a real drag pins the orb where you drop it;
+     a tap that never moves falls through to opening the dialog. */
+  const onOrbDown = (e: React.PointerEvent, i: number) => {
+    orbDrag.current = { i, sx: e.clientX, sy: e.clientY, moved: false }
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {
+      /* pointer capture unsupported */
+    }
+  }
+  const onOrbMove = (e: React.PointerEvent, i: number) => {
+    const od = orbDrag.current
+    if (!od || od.i !== i) return
+    if (!od.moved && Math.hypot(e.clientX - od.sx, e.clientY - od.sy) < 5) return
+    od.moved = true
+    const field = fieldEl.current
+    if (!field) return
+    const r = field.getBoundingClientRect()
+    pinned.current[i] = {
+      x: Math.max(3, Math.min(97, ((e.clientX - r.left) / r.width) * 100)),
+      y: Math.max(5, Math.min(95, ((e.clientY - r.top) / r.height) * 100)),
+    }
+  }
+  const onOrbUp = (e: React.PointerEvent, i: number) => {
+    const od = orbDrag.current
+    orbDrag.current = null
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    } catch {
+      /* pointer capture unsupported */
+    }
+    if (!od || od.i !== i || od.moved) return // a drag just repositions; only a clean tap opens the project
+    const p = PROJECTS[i]
+    setSelected((cur) => (cur?.id === p.id ? null : p))
+  }
+
   const doBlast = () => {
     orbs.current = makeOrbs(PROJECTS.length) // brand-new constants for every orb
+    pinned.current = {} // a blast frees every pinned orb back into motion
     tween.current = null
     blast.current = {
       start: performance.now(),
@@ -566,7 +607,7 @@ export default function App() {
 
       <div className="garden">
         <GardenBackground />
-        <div className="bubble-field">
+        <div className="bubble-field" ref={fieldEl}>
           {PROJECTS.map((p, i) => {
             const active = selected?.id === p.id
             const bubStyle = {
@@ -588,7 +629,12 @@ export default function App() {
                 }}
                 className={`bubble${active ? ' bubble--active' : ''}${p.soon ? ' bubble--soon' : ''}`}
                 style={bubStyle}
-                onClick={() => setSelected(active ? null : p)}
+                onPointerDown={(e) => onOrbDown(e, i)}
+                onPointerMove={(e) => onOrbMove(e, i)}
+                onPointerUp={(e) => onOrbUp(e, i)}
+                onPointerCancel={() => {
+                  orbDrag.current = null
+                }}
                 role="button"
                 tabIndex={0}
                 aria-label={`Open ${p.name}`}
@@ -609,7 +655,7 @@ export default function App() {
             )
           })}
           <span className={`garden-hint${selected ? ' dim' : ''}`}>
-            · tap a seedling to explore · turn the dial to stir ·
+            · tap a seedling to explore · drag it to replant · turn the dial to stir ·
           </span>
         </div>
       </div>
