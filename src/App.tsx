@@ -209,6 +209,17 @@ function playTick() {
   }
 }
 
+/* A tiny haptic blip to accompany each tick, where supported.
+   navigator.vibrate is the Android vibrator hook (Chrome/Firefox);
+   it no-ops on iOS Safari and desktop. */
+function playHaptic() {
+  try {
+    navigator.vibrate?.(8)
+  } catch {
+    /* vibration unavailable — silent */
+  }
+}
+
 /* ── Garden leaves SVG ─────────────────────────────────────────── */
 type Leaf = [number, number, number, number, number, number, string]
 const LEAVES: Leaf[] = [
@@ -424,6 +435,7 @@ export default function App() {
         while (tickAcc.current >= TICK_STEP) {
           tickAcc.current -= TICK_STEP
           playTick()
+          playHaptic()
         }
       }
       prevT.current = t
@@ -518,6 +530,11 @@ export default function App() {
       }),
     }
     playTick()
+    try {
+      navigator.vibrate?.([12, 18, 12])
+    } catch {
+      /* vibration unavailable — silent */
+    }
   }
 
   return (
