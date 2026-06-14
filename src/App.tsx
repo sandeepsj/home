@@ -421,6 +421,7 @@ export default function App() {
   const fieldEl = useRef<HTMLDivElement | null>(null)
   const pinned = useRef<Record<number, { x: number; y: number }>>({}) // orbs the user has dragged into place — anchored until a blast
   const orbDrag = useRef<{ i: number; sx: number; sy: number; moved: boolean } | null>(null)
+  const justDragged = useRef(false) // set on a drag so the trailing click doesn't open the dialog
   const wheelEl = useRef<SVGSVGElement | null>(null)
   const tRef = useRef(0) // shared time — only changes while you crank
   const prevT = useRef(0) // last frame's t (for tick detection)
@@ -543,6 +544,7 @@ export default function App() {
      a tap that never moves falls through to opening the dialog. */
   const onOrbDown = (e: React.PointerEvent, i: number) => {
     orbDrag.current = { i, sx: e.clientX, sy: e.clientY, moved: false }
+    justDragged.current = false
     try {
       e.currentTarget.setPointerCapture(e.pointerId)
     } catch {
@@ -570,9 +572,9 @@ export default function App() {
     } catch {
       /* pointer capture unsupported */
     }
-    if (!od || od.i !== i || od.moved) return // a drag just repositions; only a clean tap opens the project
-    const p = PROJECTS[i]
-    setSelected((cur) => (cur?.id === p.id ? null : p))
+    // a drag just repositions — flag it so the trailing click won't open the dialog.
+    // a clean tap leaves the flag false and falls through to onClick below.
+    if (od && od.i === i && od.moved) justDragged.current = true
   }
 
   const doBlast = () => {
@@ -634,6 +636,13 @@ export default function App() {
                 onPointerUp={(e) => onOrbUp(e, i)}
                 onPointerCancel={() => {
                   orbDrag.current = null
+                }}
+                onClick={() => {
+                  if (justDragged.current) {
+                    justDragged.current = false // consume the post-drag click; don't open
+                    return
+                  }
+                  setSelected(active ? null : p)
                 }}
                 role="button"
                 tabIndex={0}
