@@ -102,6 +102,14 @@ const PROJECTS: Project[] = [
     desc: 'Handwrite with a stylus on ruled or blank pages. Ink with pen or highlighter, sync to Drive, and let Claude read your writing back as text.',
     color: { bg: '#f1eef5', ring: '#6a5a8a', text: '#3a2a5a', shadow: 'rgba(106,90,138,.22)' },
   },
+  {
+    id: 'northstar',
+    name: 'NorthStar',
+    icon: '✶',
+    url: 'https://sandeepsj.github.io/northstar/',
+    desc: 'A long-range life map. Lay out areas as lanes and milestones across the years — where you are, what matters, and what you\'ve done.',
+    color: { bg: '#eceef7', ring: '#4a5a9a', text: '#1a2a6a', shadow: 'rgba(74,90,154,.22)' },
+  },
 ]
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
