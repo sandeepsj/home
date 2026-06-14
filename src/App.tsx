@@ -94,6 +94,14 @@ const PROJECTS: Project[] = [
     desc: 'Admin console for Revathi Music & Arts School — student records and fee management in one place.',
     color: { bg: '#f5eee8', ring: '#8a6a4a', text: '#5a3a1a', shadow: 'rgba(138,106,74,.22)' },
   },
+  {
+    id: 'notebook',
+    name: 'Notebook',
+    icon: '✎',
+    url: 'https://sandeepsj.github.io/notebook-app/#/',
+    desc: 'Handwrite with a stylus on ruled or blank pages. Ink with pen or highlighter, sync to Drive, and let Claude read your writing back as text.',
+    color: { bg: '#f1eef5', ring: '#6a5a8a', text: '#3a2a5a', shadow: 'rgba(106,90,138,.22)' },
+  },
 ]
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
