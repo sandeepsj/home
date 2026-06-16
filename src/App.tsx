@@ -332,7 +332,7 @@ function AddToClaude({ endpoint }: { endpoint: string }) {
     timer.current = setTimeout(() => setDone(false), 8000)
     // opens the "Add custom connector" dialog directly (Customize → Connectors)
     window.open(
-      'https://claude.ai/settings/connectors?modal=add-custom-connector',
+      'https://claude.ai/customize/connectors?modal=add-custom-connector',
       '_blank',
       'noopener,noreferrer',
     )
