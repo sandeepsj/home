@@ -38,6 +38,21 @@ const PROJECTS: Project[] = [
     url: 'https://sandeepsj.github.io/resume-maker/#/resumes',
     desc: 'Build, version, and export résumés. Pick a template, fill in the blanks, ship the PDF.',
     color: { bg: '#eef5f0', ring: '#5a8a6a', text: '#2a5a3a', shadow: 'rgba(90,138,106,.22)' },
+    mcp: {
+      endpoint: 'https://resume-maker-mcp.sandeepsj0000.workers.dev/mcp',
+      tools: [
+        'get_career_overview',
+        'create_resume',
+        'add_experience',
+        'add_tasks',
+        'list_resumes',
+        'get_resume',
+        'find_best_resume',
+        'add_comment',
+      ],
+      prompt:
+        'Review my career overview, then create a résumé tailored to a senior backend role — pulling in my most relevant experience.',
+    },
   },
   {
     id: 'exceli',
