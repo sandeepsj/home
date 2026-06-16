@@ -54,6 +54,12 @@ const PROJECTS: Project[] = [
     url: 'https://sandeepsj.github.io/doc-to-dashboard/',
     desc: 'Drop in markdown, get a browsable dashboard. Front matter, Mermaid, KaTeX, callouts — all rendered.',
     color: { bg: '#f5eef0', ring: '#8a5a6a', text: '#5a2a3a', shadow: 'rgba(138,90,106,.22)' },
+    mcp: {
+      endpoint: 'https://doc-to-dashboard-mcp.sandeepsj0000.workers.dev/mcp',
+      tools: ['list_projects', 'read_document', 'create_document'],
+      prompt:
+        'List my dashboard projects, then write a new document summarizing this week’s progress — with a Mermaid flowchart — and add it.',
+    },
   },
   {
     id: 'journal',
