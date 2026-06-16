@@ -330,7 +330,12 @@ function AddToClaude({ endpoint }: { endpoint: string }) {
     setDone(true)
     clearTimeout(timer.current)
     timer.current = setTimeout(() => setDone(false), 8000)
-    window.open('https://claude.ai/settings/connectors', '_blank', 'noopener,noreferrer')
+    // opens the "Add custom connector" dialog directly (Customize → Connectors)
+    window.open(
+      'https://claude.ai/settings/connectors?modal=add-custom-connector',
+      '_blank',
+      'noopener,noreferrer',
+    )
   }
   return (
     <div className="mcp__add-wrap">
@@ -339,8 +344,8 @@ function AddToClaude({ endpoint }: { endpoint: string }) {
       </button>
       <p className={`mcp__add-hint${done ? ' is-shown' : ''}`}>
         {done
-          ? 'Endpoint copied. In Claude: + → Add custom connector → paste → Connect.'
-          : 'Opens Claude’s connectors and copies the endpoint for you to paste (Pro/Max).'}
+          ? 'Endpoint copied. In the dialog: paste it in the URL field → Add → sign in with Google.'
+          : 'Opens Claude’s Add-connector dialog and copies the endpoint to paste (Google sign-in).'}
       </p>
     </div>
   )
