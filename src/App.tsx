@@ -131,6 +131,29 @@ const PROJECTS: Project[] = [
     desc: 'A long-range life map. Lay out areas as lanes and milestones across the years — where you are, what matters, and what you\'ve done.',
     color: { bg: '#eceef7', ring: '#4a5a9a', text: '#1a2a6a', shadow: 'rgba(74,90,154,.22)' },
   },
+  {
+    id: 'momo',
+    name: 'momo',
+    icon: '🐾',
+    url: 'https://sandeepsj.github.io/momo/',
+    desc: 'A cozy home base for your pet — profile, events, medical history, AI-transcribed prescriptions, care reminders, a training graduation roadmap and a photo gallery. Backed by your own Google Drive.',
+    color: { bg: '#f9efe6', ring: '#c87a4a', text: '#7a3a1a', shadow: 'rgba(200,122,74,.22)' },
+    mcp: {
+      endpoint: 'https://momo-mcp.sandeepsj0000.workers.dev/mcp',
+      tools: [
+        'list_pets',
+        'get_pet_overview',
+        'get_medical_history',
+        'add_event',
+        'add_reminder',
+        'complete_reminder',
+        'log_weight',
+        'add_medical_record',
+      ],
+      prompt:
+        'Give me momo’s overview, tell me which vaccinations or deworming are due soon, and log that he had his tick spot-on today.',
+    },
+  },
 ]
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
