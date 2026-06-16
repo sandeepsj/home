@@ -148,8 +148,9 @@ body,
     radial-gradient(ellipse at 38% 24%, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0) 46%),
     radial-gradient(circle at 72% 78%, color-mix(in srgb, var(--bub-ring) 10%, transparent) 0%, transparent 52%),
     var(--bub-bg);
-  cursor: grab;
-  touch-action: none;
+  /* visuals only — the glow/halo & dashed ring live here and must NOT be clipped.
+     all pointer input is handled by .bubble__hit, a truly circular hit layer. */
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -195,10 +196,23 @@ body,
     0 14px 44px var(--bub-shadow);
   z-index: 50 !important;
 }
-.bubble:active {
+/* The circular hit layer: clip-path clips POINTER EVENTS (not just paint, the way
+   border-radius does), so only the visible disc responds. In an overlap the topmost
+   orb's disc wins the cursor, and :hover lifts it to the front — so a click strictly
+   opens the orb you see, never the one behind it. */
+.bubble__hit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  clip-path: circle(50%);
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+.bubble__hit:active {
   cursor: grabbing;
 }
-.bubble:focus-visible {
+.bubble:has(.bubble__hit:focus-visible) {
   outline: 3px solid var(--bub-ring);
   outline-offset: 4px;
 }

@@ -631,28 +631,6 @@ export default function App() {
                 }}
                 className={`bubble${active ? ' bubble--active' : ''}${p.soon ? ' bubble--soon' : ''}`}
                 style={bubStyle}
-                onPointerDown={(e) => onOrbDown(e, i)}
-                onPointerMove={(e) => onOrbMove(e, i)}
-                onPointerUp={(e) => onOrbUp(e, i)}
-                onPointerCancel={() => {
-                  orbDrag.current = null
-                }}
-                onClick={() => {
-                  if (justDragged.current) {
-                    justDragged.current = false // consume the post-drag click; don't open
-                    return
-                  }
-                  setSelected(active ? null : p)
-                }}
-                role="button"
-                tabIndex={0}
-                aria-label={`Open ${p.name}`}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    setSelected(active ? null : p)
-                  }
-                }}
               >
                 <div className="bubble__ring" aria-hidden="true"></div>
                 <span className="bubble__icon" aria-hidden="true">
@@ -660,6 +638,33 @@ export default function App() {
                 </span>
                 <span className="bubble__label">{p.name}</span>
                 {p.soon && <span className="bubble__soon">Incoming</span>}
+                {/* circular hit layer — owns all pointer input so only the visible
+                    disc is clickable/hoverable (see .bubble__hit in index.css) */}
+                <div
+                  className="bubble__hit"
+                  onPointerDown={(e) => onOrbDown(e, i)}
+                  onPointerMove={(e) => onOrbMove(e, i)}
+                  onPointerUp={(e) => onOrbUp(e, i)}
+                  onPointerCancel={() => {
+                    orbDrag.current = null
+                  }}
+                  onClick={() => {
+                    if (justDragged.current) {
+                      justDragged.current = false // consume the post-drag click; don't open
+                      return
+                    }
+                    setSelected(active ? null : p)
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open ${p.name}`}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setSelected(active ? null : p)
+                    }
+                  }}
+                />
               </div>
             )
           })}
