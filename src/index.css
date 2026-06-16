@@ -556,6 +556,38 @@ body,
   animation: pulse 2.4s ease-in-out infinite;
   flex: none;
 }
+.mcp__add-wrap {
+  margin-bottom: 18px;
+}
+.mcp__add {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: var(--dlg-ring);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 160ms, transform 160ms;
+}
+.mcp__add:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.mcp__add-hint {
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.55;
+  letter-spacing: 0.03em;
+  color: var(--ink-faint);
+}
+.mcp__add-hint.is-shown {
+  color: #2a6a3a;
+}
 .mcp__row {
   display: flex;
   align-items: flex-start;

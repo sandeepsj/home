@@ -308,6 +308,38 @@ function CopyBtn({ text }: { text: string }) {
   )
 }
 
+/* Best-effort "one-click" connector add. Claude.ai has no deep-link that
+   auto-registers a remote MCP server, so we do the next best thing: copy the
+   endpoint and open the connectors page, then tell the user to paste it. */
+function AddToClaude({ endpoint }: { endpoint: string }) {
+  const [done, setDone] = useState(false)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const add = async () => {
+    try {
+      await navigator.clipboard.writeText(endpoint)
+    } catch {
+      /* clipboard blocked — the endpoint row below is still copyable by hand */
+    }
+    setDone(true)
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => setDone(false), 8000)
+    window.open('https://claude.ai/settings/connectors', '_blank', 'noopener,noreferrer')
+  }
+  return (
+    <div className="mcp__add-wrap">
+      <button type="button" className="mcp__add" onClick={add}>
+        Add to Claude <span aria-hidden="true">↗</span>
+      </button>
+      <p className={`mcp__add-hint${done ? ' is-shown' : ''}`}>
+        {done
+          ? 'Endpoint copied. In Claude: + → Add custom connector → paste → Connect.'
+          : 'Opens Claude’s connectors and copies the endpoint for you to paste (Pro/Max).'}
+      </p>
+    </div>
+  )
+}
+
 /* ── Project dialog ────────────────────────────────────────────── */
 function ProjectDialog({ project: p, onClose }: { project: Project; onClose: () => void }) {
   const isImg = /^(https?:|data:image)/i.test((p.icon || '').trim())
@@ -344,6 +376,7 @@ function ProjectDialog({ project: p, onClose }: { project: Project; onClose: () 
             <div className="mcp__head">
               <span className="mcp__head-dot" aria-hidden="true"></span>Claude · MCP connection
             </div>
+            <AddToClaude endpoint={p.mcp.endpoint} />
             <div className="mcp__row">
               <span className="mcp__key">endpoint</span>
               <div className="mcp__val">
