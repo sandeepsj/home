@@ -494,7 +494,10 @@ export default function App() {
         el.style.width = s + 'px'
         el.style.height = s + 'px'
         el.style.opacity = String(lf * (PROJECTS[i].soon ? 0.62 : 1))
-        el.style.zIndex = String(20 + Math.round(size))
+        // stack by the orb's *stable* base diameter, not its per-frame breathing
+        // size — otherwise overlapping orbs swap z-order every frame and the
+        // pointer lands on whichever happens to be on top that instant.
+        el.style.zIndex = String(20 + Math.round(o.base))
       })
       if (wheelEl.current) wheelEl.current.style.transform = `rotate(${t * 26}deg)`
       raf = requestAnimationFrame(loop)

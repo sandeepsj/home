@@ -194,7 +194,9 @@ body,
     inset 0 -2px 8px rgba(0, 0, 0, 0.04),
     0 0 0 7px color-mix(in srgb, var(--bub-ring) 22%, transparent),
     0 14px 44px var(--bub-shadow);
-  z-index: 50 !important;
+  /* must beat every resting orb's z-index (20 + base diameter ≈ 110–140),
+     otherwise hovering would drop the orb BEHIND its neighbours. */
+  z-index: 900 !important;
 }
 /* The circular hit layer: clip-path clips POINTER EVENTS (not just paint, the way
    border-radius does), so only the visible disc responds. In an overlap the topmost
@@ -223,7 +225,7 @@ body,
     inset 0 -2px 8px rgba(0, 0, 0, 0.04),
     0 0 0 8px color-mix(in srgb, var(--bub-ring) 28%, transparent),
     0 16px 52px var(--bub-shadow) !important;
-  z-index: 60 !important;
+  z-index: 950 !important;
 }
 .bubble--soon .bubble__icon {
   filter: saturate(0.3);
