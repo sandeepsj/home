@@ -154,6 +154,14 @@ const PROJECTS: Project[] = [
         'Give me momo’s overview, tell me which vaccinations or deworming are due soon, and log that he had his tick spot-on today.',
     },
   },
+  {
+    id: 'vaultexplorer',
+    name: 'Vault Explorer',
+    icon: '▤',
+    url: 'https://web-sandeepsjs-projects.vercel.app/',
+    desc: 'Browse any GitHub repository like a filing cabinet. Pin favourites, group related files, copy or print a path, and hop from a note to the scan it came from. Built for phones first.',
+    color: { bg: '#f7ecea', ring: '#b0524a', text: '#6e2620', shadow: 'rgba(176,82,74,.22)' },
+  },
 ]
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
