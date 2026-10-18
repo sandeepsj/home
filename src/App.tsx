@@ -162,6 +162,14 @@ const PROJECTS: Project[] = [
     desc: 'Browse any GitHub repository like a filing cabinet. Pin favourites, group related files, copy or print a path, and hop from a note to the scan it came from. Built for phones first.',
     color: { bg: '#f7ecea', ring: '#b0524a', text: '#6e2620', shadow: 'rgba(176,82,74,.22)' },
   },
+  {
+    id: 'strivers',
+    name: 'Sheet Tracker',
+    icon: '☑',
+    url: 'https://sandeepsj.github.io/strivers-sheet/',
+    desc: 'Every Striver DSA sheet — A2Z, SDE, 75, Blind 75, 150 and 180 patterns — over one solved list. Tick a problem once and it’s done everywhere; progress and notes live in your Google Drive.',
+    color: { bg: '#f6f1e4', ring: '#9a7a2a', text: '#5a4210', shadow: 'rgba(154,122,42,.22)' },
+  },
 ]
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
